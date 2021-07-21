@@ -404,6 +404,7 @@ class Program(ASTNode):
         # self.includes = ["stdlib.h", "stdbool.h"]
         # self.defines = {"bool": "_Bool"}
         self.includes = []
+        self.includes_set = set()
         self.defines = {"bool": "_Bool", "true": "1", "false": "0", "NULL": "(void *) 0"}
         self.global_vars = {}  # type -> [value_of_global_1, value_of_global_2...]
         self.structs = []
@@ -420,7 +421,7 @@ class Program(ASTNode):
     def stringify_parts(self):
 
         # includes
-        includes = ["#include <%s>" % (f,) for f in self.includes]
+        includes = ["#include <%s>" % (f,) for f in self.includes + list(self.includes_set)]
         includes = NEW_LINE.join(includes)
 
         # defines
@@ -515,7 +516,7 @@ class Program(ASTNode):
     #         if param_types == p_types:
     #             result.append(function)
     #     return result
-    
+
     def get_functions_by_return_type(self, return_type):
         result = []
         for function in self.functions:

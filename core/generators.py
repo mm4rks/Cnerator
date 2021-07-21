@@ -10,10 +10,12 @@ Program representation is return by each generator, represented as AST nodes.
 """
 
 from __future__ import print_function
+import traceback
+import sys
 
 from typing import Union
 
-from core import probs, probs_helper, ast, type_inference, utils
+from core import probs, probs_helper, ast, type_inference, utils, stdcalls
 from visitors import function_subs
 from core.utils import print_if_verbose
 from core.ast import *
@@ -354,6 +356,12 @@ def _return_types_distribution(program, white_list):
     return d
 
 
+def generate_stmt_std_call(program: Program, function: Function) -> ASTNode:
+    print("stdcall")
+    std_call = stdcalls.Strlen()
+    program.includes_set.add(std_call.lib)
+    return generate_stmt_invocation(program, function, invoked_func=std_call)
+
 def generate_stmt_invocation(program, function, invoked_func=None):
     if not invoked_func:
         # generates return type
@@ -561,10 +569,6 @@ def generate_type_struct(program, function, old_type):
 
 
 ################ Functions and Program ################
-
-def generate_std_call(program: ast.Program, std_call):
-    print("STD_CALL")
-    program.includes.append(std_call.lib)
 
 def generate_function(program, function, return_type):
     # Do we take an existing function?
