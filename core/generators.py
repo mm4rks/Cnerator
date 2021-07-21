@@ -562,6 +562,10 @@ def generate_type_struct(program, function, old_type):
 
 ################ Functions and Program ################
 
+def generate_std_call(program: ast.Program, std_call):
+    print("STD_CALL")
+    program.includes.append(std_call.lib)
+
 def generate_function(program, function, return_type):
     # Do we take an existing function?
     if isinstance(return_type, ast.Void):
