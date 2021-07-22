@@ -20,6 +20,8 @@ from visitors import function_subs
 from core.utils import print_if_verbose
 from core.ast import *
 
+import logging
+LOGGER = logging.getLogger(__name__)
 
 ################ Expressions ####################
 
@@ -115,7 +117,6 @@ def generate_literal(program, function, literal_type, from_declaration=False):
 
 
 def generate_expression(program, function, exp_type, exp_depth_prob):
-
     # Check implicit promotion
     if probs_helper.random_value(probs.implicit_promotion_bool):
         try:
@@ -222,8 +223,12 @@ def generate_expression_arity_3(program, function, exp_type, operator,
 
 def generate_expression_invocation(program, function, return_type, exp_depth_prob):
     # generates the function (if necessary)
-    invoked_func = generate_function(program, function, return_type)
 
+    if std_method := stdcalls.get_std_method_by_return_type(return_type):
+        invoked_func = std_method
+        print("MATCH!")
+    else:
+        invoked_func = generate_function(program, function, return_type)
     # generates the arguments
     params = []
     expression_depth = probs_helper.random_value(exp_depth_prob)
@@ -301,7 +306,6 @@ def generate_stmt_expression_stmt(program, function):
     expected_type = generate_type(program, function, new_type_cls=expected_type_cls, old_type_obj=None)
     return generate_expression(program, function, expected_type, None)
 
-
 def generate_stmt_augmented_assignment(program, function):
 
     # Get type
@@ -355,12 +359,16 @@ def _return_types_distribution(program, white_list):
             continue
     return d
 
-
 def generate_stmt_std_call(program: Program, function: Function) -> ASTNode:
-    print("stdcall")
-    std_call = stdcalls.Strlen()
+    """Generate simple statement call to standard method with side effect s(if exixsts, else call to generated func)"""
+    if not (std_call := stdcalls.get_std_method_with_side_effects()):
+        return generate_stmt_invocation(program, function)
     program.includes_set.add(std_call.lib)
-    return generate_stmt_invocation(program, function, invoked_func=std_call)
+    params = [generate_expression(program, function, arg_type, probs.exp_depth_prob) for arg_type in std_call.arg_types]
+    program.invocation_as_stmt[std_call.name] += 1
+    return ast.Invocation(std_call.name, params, std_call.return_type, True)
+
+
 
 def generate_stmt_invocation(program, function, invoked_func=None):
     if not invoked_func:
