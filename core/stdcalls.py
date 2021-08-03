@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from typing import Iterable, List, Optional, Tuple
-from core import ast, probs_helper
-from core.ast import Program, Function, ASTNode
 from itertools import count
 from random import choice
 
