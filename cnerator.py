@@ -9,15 +9,15 @@ To see the different arguments provided, run Cnerator with either ``-h`` or ``--
 
 from __future__ import print_function
 
+import logging
 import os
 import sys
 
-from debug import call_inspector, structure_inspector
-from params import parameters
-from params.parameters import parse_args, get_modules_to_import, get_probs_to_override
-from params.writter import write_in_files
-from params import json_probs
 import core
+from debug import call_inspector, structure_inspector
+from params import json_probs, parameters
+from params.parameters import get_modules_to_import, get_probs_to_override, parse_args
+from params.writter import write_in_files
 
 
 def run(args):
@@ -34,13 +34,20 @@ def run(args):
     core.probs.set_probabilities(get_probs_to_override(args.probs))
     if args.probsfile:
         from core import probs
-        probabilities = json_probs.parse_probabilities_specification_json_file(args.probsfile)
+
+        probabilities = json_probs.parse_probabilities_specification_json_file(
+            args.probsfile
+        )
         probs.set_probabilities(probabilities)
 
     # Process the json file to create functions, or generates a program using the probabilities defined
-    if args.functions:  # if a json file was passed, it defines the functions to be generated
+    if (
+        args.functions
+    ):  # if a json file was passed, it defines the functions to be generated
         dictionary = parameters.parse_function_specification_json_file(args.functions)
-        program = core.generators.generate_program_with_function_distribution(dictionary, args, remove_unwanted_functions=True)
+        program = core.generators.generate_program_with_function_distribution(
+            dictionary, args, remove_unwanted_functions=True
+        )
     else:  # otherwise, a random program is generated, considering the specified probabilities
         program = core.generators.generate_program()
 
@@ -59,20 +66,28 @@ def run(args):
     # Write debug graph information
     if args.debug:
         # Write structure graph
-        structure_inspector.write_graph(program, os.path.join(args.output_dir, args.output + ".structure.dot"))
+        structure_inspector.write_graph(
+            program, os.path.join(args.output_dir, args.output + ".structure.dot")
+        )
         # Write call graph
-        call_inspector.write_graph(program, True, os.path.join(args.output_dir, args.output + ".call.dot"))
-        call_inspector.write_graph(program, False, os.path.join(args.output_dir, args.output + ".call_light.dot"))
+        call_inspector.write_graph(
+            program, True, os.path.join(args.output_dir, args.output + ".call.dot")
+        )
+        call_inspector.write_graph(
+            program,
+            False,
+            os.path.join(args.output_dir, args.output + ".call_light.dot"),
+        )
 
 
 def main():
     """Main function.
     To see the different arguments provided, run Cnerator with either ``-h`` or ``--help`` command line arguments.
     """
+
+    logging.basicConfig(level=logging.INFO)
     exit(run(parse_args()))
 
 
 if __name__ == "__main__":
     main()
-
-

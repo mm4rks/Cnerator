@@ -10,8 +10,6 @@ Program representation is return by each generator, represented as AST nodes.
 """
 
 from __future__ import print_function
-import traceback
-import sys
 
 from typing import Union
 
@@ -224,9 +222,10 @@ def generate_expression_arity_3(program, function, exp_type, operator,
 def generate_expression_invocation(program, function, return_type, exp_depth_prob):
     # generates the function (if necessary)
 
-    if std_method := stdcalls.get_std_method_by_return_type(return_type):
+    if std_method := stdcalls.get_method_for_call_inside_expression(return_type):
         invoked_func = std_method
-        print("MATCH!")
+        program.includes_set.add(invoked_func.lib)
+        LOGGER.info("Selected '%s' for use in expression", invoked_func.name)
     else:
         invoked_func = generate_function(program, function, return_type)
     # generates the arguments
@@ -361,7 +360,7 @@ def _return_types_distribution(program, white_list):
 
 def generate_stmt_std_call(program: Program, function: Function) -> ASTNode:
     """Generate simple statement call to standard method with side effect s(if exixsts, else call to generated func)"""
-    if not (std_call := stdcalls.get_std_method_with_side_effects()):
+    if not (std_call := stdcalls.get_method_for_simple_call()):
         return generate_stmt_invocation(program, function)
     program.includes_set.add(std_call.lib)
     params = [generate_expression(program, function, arg_type, probs.exp_depth_prob) for arg_type in std_call.arg_types]
