@@ -145,7 +145,7 @@ class Malloc(StandardCall):
 
     lib = "stdlib.h"
     name = "malloc"
-    return_type = ast.UnsignedInt()
+    return_type = ast.Pointer(ast.UnsignedInt())
     arg_types = [ast.UnsignedInt()]
     arg_names = None
     use_in_expression = True
@@ -325,7 +325,7 @@ class Toascii(StandardCall):
 
     # void pointer not supported by generator
     lib = "string.h"
-    name = "strncpy"
+    name = "toascii"
     return_type = ast.SignedInt()
     arg_types = [ast.SignedInt()]
     arg_names = None
