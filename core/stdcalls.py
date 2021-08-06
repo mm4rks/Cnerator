@@ -119,8 +119,8 @@ class Memchr(StandardCall):
         ast.UnsignedInt(),
     ]
     arg_names = None
-    use_in_expression = False  # maybe?
-    use_in_simple_call = True  # maybe?
+    use_in_expression = False
+    use_in_simple_call = True
 
 
 class Memcpy(StandardCall):
@@ -184,7 +184,7 @@ class Realloc(StandardCall):
     # void pointer not supported by generator
     lib = "stdlib.h"
     name = "realloc"
-    return_type = ast.Pointer(ast.UnsignedInt())
+    return_type = ast.Void()
     arg_types = [ast.Pointer(ast.UnsignedInt()), ast.UnsignedInt()]
     arg_names = None
     use_in_expression = True
